@@ -1,3 +1,7 @@
+# User defined
+.DS_Store
+*.diff
+
 # Logs
 logs
 *.log
@@ -36,7 +40,7 @@ build/Release
 node_modules/
 jspm_packages/
 
-# TypeScript v1 declaration files
+# Typescript v1 declaration files
 typings/
 
 # Optional npm cache directory
@@ -56,6 +60,3 @@ typings/
 
 # dotenv environment variables file
 .env
-
-# next.js build output
-.next
