@@ -26,8 +26,8 @@ app.get('/new-article', (request, response) => {
 app.get('/articles', (request, response) => {
   client.query(`
     SELECT authors.author_id, authors.author, authors.author_url, articles.title, articles.category, articles.published_on, articles.body, articles.article_id
-    FROM authors
-    INNER JOIN articles
+    FROM articles
+    INNER JOIN authors
     ON articles.author_id = authors.author_id;
   `)
     .then(result => {
@@ -41,51 +41,67 @@ app.get('/articles', (request, response) => {
 
 app.post('/articles', (request, response) => {
   let SQL = `
-    UPDATE articles
-    INNER JOIN authors
-    ON articles.author_id = authors.author_id
-    SET 
+    INSERT INTO authors(author, author_url)
+    VALUES($1,$2) 
+    ON CONFLICT DO NOTHING;
     `;
-  let values = [];
+  let values = [
+    request.body.author,
+    request.body.author_url
+  ];
 
   client.query(SQL, values,
     function(err) {
       if (err) {
         console.error(err);
-        // REVIEW: Early return here prevents queryTwo from running if there's an error
+        // REVIEWED: Early return here prevents queryTwo from running if there's an error
         return response.status(500).send(err);
       }
 
-      // REVIEW: This is our second query, to be executed when this first query is complete.
+      // REVIEWED: This is our second query, to be executed when this first query is complete.
       queryTwo();
     }
   )
 
   function queryTwo() {
-    let SQL = '';
-    let values = [];
+    let SQL = `
+    SELECT author_id 
+    FROM authors
+    WHERE author=$1
+    `;
+    let values = [request.body.author];
     client.query(SQL, values,
       function(err, result) {
         if (err) {
           console.error(err);
-          // REVIEW: Early return here prevents queryThree from running if there's an error
+          // REVIEWED: Early return here prevents queryThree from running if there's an error
           return response.status(500).send(err);
         }
 
-        // REVIEW: This is our third query, to be executed when the second is complete. We are also passing the author_id into our third query.
+        // REVIEWED: This is our third query, to be executed when the second is complete. We are also passing the author_id into our third query.
         queryThree(result.rows[0].author_id);
       }
     )
   }
 
   function queryThree(author_id) {
-    let SQL = '';
-    let values = [];
+    let SQL = `
+      INSERT INTO 
+      articles(author_id, title, category, published_on, body) 
+      VALUES($1, $2, $3, $4, $5)
+      `;
+    let values = [
+      author_id,
+      request.body.title,
+      request.body.category,
+      request.body.published_on,
+      request.body.body
+    ];
     client.query(SQL, values,
       function(err) {
         if (err) {
           console.error(err);
-          // REVIEW: Early return here prevents sending again if there's an error
+          // REVIEWED: Early return here prevents sending again if there's an error
           return response.status(500).send(err);
         }
 
@@ -182,7 +198,7 @@ function loadArticles() {
     })
 }
 
-// REVIEW: Below are two queries, wrapped in the loadDB() function, which create separate tables in our DB, and create a relationship between the authors and articles tables.
+// REVIEWED: Below are two queries, wrapped in the loadDB() function, which create separate tables in our DB, and create a relationship between the authors and articles tables.
 // THEN they load their respective data from our JSON file.
 function loadDB() {
   client.query(`
