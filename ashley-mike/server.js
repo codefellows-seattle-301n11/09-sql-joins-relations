@@ -154,7 +154,7 @@ app.delete('/articles', (request, response) => {
     });
 });
 
-// REVIEW: This calls the loadDB() function, defined below.
+// REVIEWED: This calls the loadDB() function, defined below.
 loadDB();
 
 app.listen(PORT, () => {
@@ -176,7 +176,7 @@ function loadAuthors() {
   })
 }
 
-// REVIEW: This helper function will load articles into the DB if the DB is empty.
+// REVIEWED: This helper function will load articles into the DB if the DB is empty.
 function loadArticles() {
   let SQL = 'SELECT COUNT(*) FROM articles';
   client.query(SQL)
