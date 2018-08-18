@@ -6,7 +6,7 @@ const express = require('express');
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-const conString = '';
+const conString = 'postgres://localhost:5432/lab09';
 const client = new pg.Client(conString);
 client.connect();
 client.on('error', error => {
@@ -17,14 +17,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('./public'));
 
-// REVIEW: These are routes for requesting HTML resources.
+// REVIEWED: These are routes for requesting HTML resources.
 app.get('/new-article', (request, response) => {
   response.sendFile('new.html', { root: './public' });
 });
 
-// REVIEW: These are routes for making API calls to enact CRUD operations on our database.
+// REVIEWED: These are routes for making API calls to enact CRUD operations on our database.
 app.get('/articles', (request, response) => {
-  client.query(``)
+  client.query(`
+    SELECT authors.author_id, authors.author, authors.author_url, articles.title, articles.category, articles.published_on, articles.body, articles.article_id
+    FROM authors
+    INNER JOIN articles
+    ON articles.author_id = authors.author_id;
+  `)
     .then(result => {
       response.send(result.rows);
     })
@@ -35,7 +40,12 @@ app.get('/articles', (request, response) => {
 });
 
 app.post('/articles', (request, response) => {
-  let SQL = '';
+  let SQL = `
+    UPDATE articles
+    INNER JOIN authors
+    ON articles.author_id = authors.author_id
+    SET 
+    `;
   let values = [];
 
   client.query(SQL, values,
