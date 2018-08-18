@@ -42,7 +42,7 @@ app.get('/articles', (request, response) => {
 });
 
 app.post('/articles', (request, response) => {
-  let SQL = '';
+  let SQL = 'SELECT authors.name FROM authors INNER JOIN articles ON authors.name';
   let values = [];
 
   client.query(SQL, values,
@@ -59,7 +59,7 @@ app.post('/articles', (request, response) => {
   )
 
   function queryTwo() {
-    let SQL = '';
+    let SQL = 'SELECT author_id FROM authors WHERE author=$1';
     let values = [];
     client.query(SQL, values,
       function(err, result) {
@@ -76,7 +76,7 @@ app.post('/articles', (request, response) => {
   }
 
   function queryThree(author_id) {
-    let SQL = '';
+    let SQL = 'INSERT author_id FROM authors WHERE author=$1';
     let values = [];
     client.query(SQL, values,
       function(err) {
@@ -93,7 +93,7 @@ app.post('/articles', (request, response) => {
 });
 
 app.put('/articles/:id', function(request, response) {
-  let SQL = '';
+  let SQL = 'UPDATE authors SET author=$1, "authorURL"=$2 WHERE author_id=$3, [request.body.author, request.body.authorURL, request.body.author_id]';
   let values = [];
   client.query(SQL, values)
     .then(() => {
