@@ -57,7 +57,6 @@ app.post('/articles', (request, response) => {
         // REVIEWED: Early return here prevents queryTwo from running if there's an error
         return response.status(500).send(err);
       }
-
       // REVIEWED: This is our second query, to be executed when this first query is complete.
       queryTwo();
     }
@@ -77,7 +76,6 @@ app.post('/articles', (request, response) => {
           // REVIEWED: Early return here prevents queryThree from running if there's an error
           return response.status(500).send(err);
         }
-
         // REVIEWED: This is our third query, to be executed when the second is complete. We are also passing the author_id into our third query.
         queryThree(result.rows[0].author_id);
       }
@@ -104,7 +102,6 @@ app.post('/articles', (request, response) => {
           // REVIEWED: Early return here prevents sending again if there's an error
           return response.status(500).send(err);
         }
-
         response.send('insert complete');
       }
     );
@@ -112,12 +109,30 @@ app.post('/articles', (request, response) => {
 });
 
 app.put('/articles/:id', function(request, response) {
-  let SQL = '';
-  let values = [];
+  let SQL = `
+    UPDATE authors 
+    SET author=$1, author_url=$2
+    WHERE author_id=$3
+  `;
+  let values = [
+    request.body.author,
+    request.body.author_url,
+    request.body.author_id
+  ];
   client.query(SQL, values)
     .then(() => {
-      let SQL = '';
-      let values = [];
+      let SQL = `
+        UPDATE articles
+        SET title=$1, category=$2, published_on=$3, body=$4
+        WHERE author_id=$5
+      `;
+      let values = [
+        request.body.title,
+        request.body.category,
+        request.body.published_on,
+        request.body.body,
+        request.body.author_id
+      ];
       return client.query(SQL, values);
     })
     .then(() => {
@@ -165,7 +180,7 @@ app.listen(PORT, () => {
 //////// ** DATABASE LOADERS ** ////////
 ////////////////////////////////////////
 
-// REVIEW: This helper function will load authors into the DB if the DB is empty.
+// REVIEWED: This helper function will load authors into the DB if the DB is empty.
 function loadAuthors() {
   fs.readFile('./public/data/hackerIpsum.json', 'utf8', (err, fd) => {
     JSON.parse(fd).forEach(ele => {
