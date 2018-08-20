@@ -6,7 +6,7 @@ const express = require('express');
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-const conString = 'postgres://postgres:1234@localhost:5432/lab_9';
+const conString = 'postgres://postgres:1234@localhost:5432/sql_join_relations';
 const client = new pg.Client(conString);
 client.connect();
 client.on('error', error => {
@@ -24,10 +24,17 @@ app.get('/new-article', (request, response) => {
 
 // REVIEW: These are routes for making API calls to enact CRUD operations on our database.
 app.get('/articles', (request, response) => {
-  client.query(``)
-    .then(result => {
-      response.send(result.rows);
-    })
+  //Join articles and authors to get everything.
+  client.query(`
+  SELECT authors.author_id, authors.author, authors.author_url,
+   articles.title, articles.category, articles.published_on, articles.body. articles.author_id
+  FROM authors
+  INNER JOIN articles
+  ON authors.author_id = articles.author.id;
+  `)
+  .then(result => {
+    response.send(result.rows);
+  })
     .catch(err => {
       console.error(err)
       response.status(500).send(err);
