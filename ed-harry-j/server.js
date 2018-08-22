@@ -6,10 +6,11 @@ const express = require('express');
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-//Harry and Ed' computer
+// PC: J, Ed and Harry
+// const conString = 'postgres://user:PASSWORD@HOST:PORT/DBNAME';
+//const conString = 'postgres://postgres:My1004CF@localhost:5432/lab09';
 const conString = 'postgres://postgres:Seattle143@localhost:5432/lab09';
-
-// J's Mac
+// Mac: J
 // const conString = 'postgres://localhost:5432/lab_09';
 
 const client = new pg.Client(conString);
