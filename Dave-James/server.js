@@ -26,11 +26,9 @@ app.get('/new-article', (request, response) => {
 app.get('/articles', (request, response) => {
   //Join articles and authors to get everything.
   client.query(`
-  SELECT authors.author_id, authors.author, authors.author_url,
-   articles.title, articles.category, articles.published_on, articles.body. articles.author_id
-  FROM authors
-  INNER JOIN articles
-  ON authors.author_id = articles.author.id;
+  SELECT * FROM articles
+  INNER JOIN authors
+  ON articles.author_id = authors.author_id;
   `)
   .then(result => {
     response.send(result.rows);
@@ -59,7 +57,7 @@ app.post('/articles', (request, response) => {
   )
 
   function queryTwo() {
-    let SQL = '';
+    let SQL = 'SELECT author_id FROM authors WHERE author = $1;';
     let values = [];
     client.query(SQL, values,
       function(err, result) {
@@ -76,8 +74,8 @@ app.post('/articles', (request, response) => {
   }
 
   function queryThree(author_id) {
-    let SQL = '';
-    let values = [];
+    let SQL = 'INSERT INTO articles(author_id, title, category, published_on, body) VALUES($1, $2, $3, $4, $5);';
+    let values = [author_id, request.body.title, request.body.category, request.body.published_on, request.body.body];
     client.query(SQL, values,
       function(err) {
         if (err) {
@@ -93,12 +91,12 @@ app.post('/articles', (request, response) => {
 });
 
 app.put('/articles/:id', function(request, response) {
-  let SQL = '';
-  let values = [];
+  let SQL = 'UPDATE authors SET author = $1, author_url = $2 WHERE author_id = $3';
+  let values = [request.body.author, request.body.author_url, request.body.author_id];
   client.query(SQL, values)
     .then(() => {
-      let SQL = '';
-      let values = [];
+      let SQL = 'UPDATE articles SET title = $1, category = $2, published_on = $3, body = $4';
+      let values = [request.body.author, request.body.author_url, request.body.author_id];
       return client.query(SQL, values);
     })
     .then(() => {
