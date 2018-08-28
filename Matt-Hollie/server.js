@@ -3,7 +3,7 @@
 const pg = require('pg');
 const fs = require('fs');
 const express = require('express');
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const app = express();
 
 const conString = 'postgres://localhost:5432/lab_9';
@@ -42,7 +42,7 @@ app.get('/articles', (request, response) => {
 });
 
 app.post('/articles', (request, response) => {
-  let SQL = 'SELECT authors.name FROM authors INNER JOIN articles ON authors.name';
+  let SQL = 'INSERT INTO authors(author, author_url) VALUES($1, $2) ON CONFLICT DO NOTHING'; 
   let values = [request.body.author, request.body.author_url];
 
   client.query(SQL, values,
